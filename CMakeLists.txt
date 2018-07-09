@@ -23,10 +23,10 @@ add_definitions(-DUNICODE -D_UNICODE)
 include_directories("common")
 
 # source files
-set(srcs Source/TestSample.h
+set(srcs Source/TestDemo.h
          Source/main.cpp	 
-		 Common/Sample.h
-         Common/Sample.cpp 
+		 Common/Demo.h
+         Common/Demo.cpp 
          Common/Application.h
 		 Common/Application.cpp)	
 	 	 
@@ -35,10 +35,9 @@ set(libs d3d11
          d3dx11)
 
 link_directories($ENV{DXSDK_DIR}Lib/x86)
-target_link_libraries(DXCollections ${libs})
 
 add_executable(DXCollections WIN32 ${srcs})
-
+target_link_libraries(DXCollections ${libs})
 
 
 
