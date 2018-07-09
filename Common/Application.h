@@ -1,12 +1,12 @@
 #ifndef _APPLICATION_H_
 #define _APPLICATION_H_
 #include <string>
-#include "Sample.h"
+#include "Demo.h"
 
 class Application
 {
 public:
-	static int Run(Sample* sample, HINSTANCE hInstance, int nCmdShow);
+	static int Run(Demo* sample, HINSTANCE hInstance, int nCmdShow);
 	static HWND GetHwnd() { return m_hwnd; }
 
 protected:
