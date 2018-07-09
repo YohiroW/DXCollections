@@ -30,7 +30,15 @@ set(srcs Source/TestSample.h
          Common/Application.h
 		 Common/Application.cpp)	
 	 	 
-add_executable(DX11Collections WIN32 ${srcs})
+# add referenced library
+set(libs d3d11
+         d3dx11)
+
+link_directories($ENV{DXSDK_DIR}Lib/x86)
+target_link_libraries(DXCollections ${libs})
+
+add_executable(DXCollections WIN32 ${srcs})
+
 
 
 
