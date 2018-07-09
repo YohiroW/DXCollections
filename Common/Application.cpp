@@ -5,14 +5,8 @@ using namespace Microsoft::WRL;
 
 HWND Application::m_hwnd = nullptr;
 
-int Application::Run(Sample* pSample, HINSTANCE hInstance, int nCmdShow)
+int Application::Run(Demo* pSample, HINSTANCE hInstance, int nCmdShow)
 {
-	// Parse the command line parameters
-	int argc;
-	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-	pSample->ParseCommandLineArgs(argv, argc);
-	LocalFree(argv);
-
 	// Initialize the window class.
 	WNDCLASSEX windowClass = { 0 };
 	windowClass.cbSize = sizeof(WNDCLASSEX);
@@ -66,7 +60,7 @@ int Application::Run(Sample* pSample, HINSTANCE hInstance, int nCmdShow)
 // Main message handler for the sample.
 LRESULT CALLBACK Application::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	Sample* pSample = reinterpret_cast<Sample*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+	Demo* demo = reinterpret_cast<Demo*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
 	switch (message)
 	{
@@ -79,24 +73,24 @@ LRESULT CALLBACK Application::WindowProc(HWND hWnd, UINT message, WPARAM wParam,
 	return 0;
 
 	case WM_KEYDOWN:
-		if (pSample)
+		if (demo)
 		{
-			pSample->OnKeyDown(static_cast<UINT8>(wParam));
+			demo->OnKeyDown(static_cast<UINT8>(wParam));
 		}
 		return 0;
 
 	case WM_KEYUP:
-		if (pSample)
+		if (demo)
 		{
-			pSample->OnKeyUp(static_cast<UINT8>(wParam));
+			demo->OnKeyUp(static_cast<UINT8>(wParam));
 		}
 		return 0;
 
 	case WM_PAINT:
-		if (pSample)
+		if (demo)
 		{
-			pSample->OnUpdate();
-			pSample->OnRender();
+			demo->OnUpdate();
+			demo->OnRender();
 		}
 		return 0;
 
