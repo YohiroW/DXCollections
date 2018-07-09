@@ -21,6 +21,7 @@ add_definitions(-DUNICODE -D_UNICODE)
 
 # include directories
 include_directories("common")
+include_directories($ENV{DXSDK_DIR}Include)
 
 # source files
 set(srcs Source/TestDemo.h
