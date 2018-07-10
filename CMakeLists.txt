@@ -1,4 +1,4 @@
-project( DX11Collections )
+project( DXCollections )
 cmake_minimum_required( VERSION 2.8 )
 
 include( CheckCXXCompilerFlag )
@@ -35,10 +35,22 @@ set(srcs Source/TestDemo.h
 set(libs d3d11
          d3dx11)
 
-link_directories($ENV{DXSDK_DIR}Lib/x86)
+if(CMAKE_CL_64)
+    set(platform x64)
+    link_directories($ENV{DXSDK_DIR}Lib/x64)
+else(CMAKE_CL_64)
+    set(platform x86)
+    link_directories($ENV{DXSDK_DIR}Lib/x86)	
+endif(CMAKE_CL_64)
+		 
 
 add_executable(DXCollections WIN32 ${srcs})
 target_link_libraries(DXCollections ${libs})
+
+# working directories
+set_target_properties(DXCollections PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Assets")
+
+
 
 
 
