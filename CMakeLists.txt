@@ -19,33 +19,43 @@ endif()
 # use unicode in projects		
 add_definitions(-DUNICODE -D_UNICODE)	
 
+set(thirdPartyPath "${CMAKE_SOURCE_DIR}/ThirdParty")
+
 # include directories
 include_directories("common")
-include_directories($ENV{DXSDK_DIR}Include)
+include_directories("ThirdParty/fbxsdk/include")
+include_directories("$ENV{DXSDK_DIR}Include")
 
 # source files
 set(srcs Source/TestDemo.h
          Source/main.cpp	 
 		 Common/Demo.h
-         Common/Demo.cpp 
+         Common/Demo.cpp
+         Common/FBXHelper.h
+         Common/FBXHelper.cpp		 
          Common/Application.h
 		 Common/Application.cpp)	
 	 	 
-# add referenced library
+# add referenced library		 
 set(libs d3d11
-         d3dx11)
+         d3dx11
+		 libfbxsdk-md
+		 libfbxsdk-mt
+		 libfbxsdk)
 
 if(CMAKE_CL_64)
     set(platform x64)
-    link_directories($ENV{DXSDK_DIR}Lib/x64)
+    link_directories("$ENV{DXSDK_DIR}Lib/x64")
+	link_directories("${thirdPartyPath}/fbxsdk/lib/vs2015/x64/debug")
 else(CMAKE_CL_64)
     set(platform x86)
-    link_directories($ENV{DXSDK_DIR}Lib/x86)	
-endif(CMAKE_CL_64)
+    link_directories("$ENV{DXSDK_DIR}Lib/x86")	
+	link_directories("${thirdPartyPath}/fbxsdk/lib/vs2015/x86/debug")
+endif(CMAKE_CL_64)	 
 		 
 
-add_executable(DXCollections WIN32 ${srcs})
-target_link_libraries(DXCollections ${libs})
+add_executable(DXCollections WIN32 "${srcs}")
+target_link_libraries(DXCollections "${libs}")
 
 # working directories
 set_target_properties(DXCollections PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Assets")
