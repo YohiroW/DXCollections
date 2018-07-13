@@ -34,7 +34,11 @@ set(srcs Source/TestDemo.h
          Common/FBXHelper.h
          Common/FBXHelper.cpp		 
          Common/Application.h
-		 Common/Application.cpp)	
+		 Common/Application.cpp
+		 Common/Globals.h
+		 Common/Meshes.h		 
+		 Common/Meshes.cpp		 
+		 )	
 	 	 
 # add referenced library		 
 set(libs d3d11
@@ -47,8 +51,8 @@ else(CMAKE_SIZEOF_VOID_P)
     set(platform x86)
 endif(CMAKE_SIZEOF_VOID_P)	 
 
-link_directories("$ENV{DXSDK_DIR}Lib/${platform}")
-link_directories("${thirdPartyPath}/fbxsdk/lib/vs2015/${platform}/debug")
+link_directories("$ENV{DXSDK_DIR}Lib/${platform}/")
+link_directories("${thirdPartyPath}/fbxsdk/lib/vs2015/${platform}/")
 
 add_executable(DXCollections "${srcs}")
 target_link_libraries(DXCollections "${libs}")
