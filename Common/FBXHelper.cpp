@@ -1,11 +1,27 @@
 #include "FBXHelper.h"
+#include "meshes.h"
+
+FBXHelper* FBXHelper::m_Instance = nullptr;
 
 FBXHelper::~FBXHelper()
 {
+	SAFE_DELETE(m_Instance);
 }
 
 FBXHelper * FBXHelper::GetInstance()
 {
+	if (!m_Instance)
+	{
+		m_Instance = new FBXHelper;
+		if (m_Instance && m_Instance->Initialize())
+		{
+			return m_Instance;
+		}
+		else
+		{
+			// log err
+		}
+	}
 	return nullptr;
 }
 
@@ -36,17 +52,22 @@ bool FBXHelper::Initialize()
 
 	m_Importer->Destroy();
 
-	ProcessNode(m_SceneRoot->GetRootNode());
-
 	return true;
 }
 
-void FBXHelper::LoadFBX(const char * fbxFileName, Meshes & meshes)
+bool FBXHelper::LoadFBX(const char * fbxFileName, Meshes* meshes)
 {
+	if (!m_Importer->Initialize(fbxFileName))
+	{
+		return false;
+	}
 
+	ProcessNode(m_SceneRoot->GetRootNode(), meshes);
+ 
+	return true;
 }
 
-void FBXHelper::ProcessNode(FbxNode* node)
+void FBXHelper::ProcessNode(FbxNode* node, Meshes* meshes)
 {
 	FbxNodeAttribute::EType type;
 
@@ -55,7 +76,7 @@ void FBXHelper::ProcessNode(FbxNode* node)
 		switch (node->GetNodeAttribute()->GetAttributeType())
 		{
 		case FbxNodeAttribute::eMesh:
-			ProcessMesh(node->GetMesh());
+			ProcessMesh(node->GetMesh(), meshes);
 			break;
 		default:
 			break;
@@ -64,44 +85,140 @@ void FBXHelper::ProcessNode(FbxNode* node)
 
 	for (int i = 0; i< node->GetChildCount(); ++i)
 	{
-		ProcessNode(node->GetChild(i));
+		ProcessNode(node->GetChild(i), meshes);
 	}
 }
 
-void FBXHelper::ProcessMesh(FbxMesh* mesh)
+void FBXHelper::ProcessMesh(FbxMesh* mesh, Meshes* meshes)
 {
-	//assert(mesh);
+	if (!mesh->GetNode())
+		return;
 
-	FbxVector4* pointArray = mesh->GetControlPoints();
-	int meshCount = mesh->GetPolygonCount();
-	int vertexIndex = 0;
+	const int polygonCount = mesh->GetPolygonCount();
 
-	//
-	Vec3 vertex[3];
-	Vec3 normal[3];
-	Vec2 uv[3][2];
-
-	for (int i = 0; i< meshCount; ++i)
+	// Congregate all the data of a mesh to be cached in VBOs.
+	// If normal or UV is by polygon vertex, record all vertex attributes by polygon vertex.
+	bool hasNormal = mesh->GetElementNormalCount() > 0;
+	bool hasUV = mesh->GetElementUVCount() > 0;
+	FbxGeometryElement::EMappingMode normalMappingMode = FbxGeometryElement::eNone;
+	FbxGeometryElement::EMappingMode uvMappingMode = FbxGeometryElement::eNone;
+	bool allByControlPoint = true;
+	if (hasNormal)
 	{
-		for (int j = 0; j < 3; ++j)
+		normalMappingMode = mesh->GetElementNormal(0)->GetMappingMode();
+		if (normalMappingMode == FbxGeometryElement::eNone)
 		{
-			int ctrlPointIndex = mesh->GetPolygonVertex(i, j);
-			// Read the vertex 
-			ReadVertex(mesh, ctrlPointIndex, &vertex[j]);
-
-			for (int k = 0; k < 2; ++k)
-			{
-				ReadUV(mesh, ctrlPointIndex, mesh->GetTextureUVIndex(i, j), k, &(uv[j][k]));
-			}
-
-			// Read the normal of each vertex 
-			ReadNormal(mesh, ctrlPointIndex, vertexIndex, &normal[j]);
-
-			vertexIndex++;
- 		}
+			hasNormal = false;
+		}
+		if (hasNormal && normalMappingMode != FbxGeometryElement::eByControlPoint)
+		{
+			allByControlPoint = false;
+		}
+	}
+	if (hasUV)
+	{
+		uvMappingMode = mesh->GetElementUV(0)->GetMappingMode();
+		if (uvMappingMode == FbxGeometryElement::eNone)
+		{
+			hasUV = false;
+		}
+		if (hasUV && uvMappingMode != FbxGeometryElement::eByControlPoint)
+		{
+			allByControlPoint = false;
+		}
 	}
 
+	// Allocate the array memory, by control point or by polygon vertex.
+	int polygonVertexCount = mesh->GetControlPointsCount();
+	if (!allByControlPoint)
+	{
+		polygonVertexCount = polygonCount * TRIANGLE_VERTEX_COUNT;
+	}
 
+	// Populate the array with vertex attribute, if by control point.
+	const FbxVector4 * controlPoints = mesh->GetControlPoints();
+	FbxVector4 currentVertex;
+	FbxVector4 currentNormal;
+	FbxVector2 currentUV;
+	if (allByControlPoint)
+	{
+		const FbxGeometryElementNormal * normalElement = NULL;
+		const FbxGeometryElementUV * uvElement = NULL;
+		if (hasNormal)
+		{
+			normalElement = mesh->GetElementNormal(0);
+		}
+		if (hasUV)
+		{
+			uvElement = mesh->GetElementUV(0);
+		}
+		for (int index = 0; index < polygonVertexCount; ++index)
+		{
+			// Save the vertex position.
+			currentVertex = controlPoints[index];
+			meshes->AddVertex(Vec4(currentVertex[0], currentVertex[1], currentVertex[2], 1.0f));
+			// Save the normal.
+			if (hasNormal)
+			{
+				int normalIndex = index;
+				if (normalElement->GetReferenceMode() == FbxLayerElement::eIndexToDirect)
+				{
+					normalIndex = normalElement->GetIndexArray().GetAt(index);
+				}
+				currentNormal = normalElement->GetDirectArray().GetAt(normalIndex);
+				meshes->AddNormal(Vec3(currentNormal[0], currentNormal[1], currentNormal[2]));
+			}
+
+			// Save the UV.
+			if (hasUV)
+			{
+				int uvIndex = index;
+				if (uvElement->GetReferenceMode() == FbxLayerElement::eIndexToDirect)
+				{
+					uvIndex = uvElement->GetIndexArray().GetAt(index);
+				}
+				currentUV = uvElement->GetDirectArray().GetAt(uvIndex);
+				meshes->AddUV(Vec2(currentUV[0], currentUV[1]));
+			}
+		}
+
+	}
+
+	int vertexCount = 0;
+	for (int polygonIndex = 0; polygonIndex < polygonCount; ++polygonIndex)
+	{
+		for (int verticeIndex = 0; verticeIndex < TRIANGLE_VERTEX_COUNT; ++verticeIndex)
+		{
+			const int controlPointIndex = mesh->GetPolygonVertex(polygonIndex, verticeIndex);
+
+			if (allByControlPoint)
+			{
+				meshes->AddIndex(controlPointIndex);
+			}
+			// Populate the array with vertex attribute, if by polygon vertex.
+			else
+			{
+				currentVertex = controlPoints[controlPointIndex];
+
+				meshes->AddIndex(vertexCount);
+				meshes->AddVertex(Vec4(currentVertex[0], currentVertex[1], currentVertex[2], 1.0f));
+
+				if (hasNormal)
+				{
+					mesh->GetPolygonVertexNormal(polygonIndex, verticeIndex, currentNormal);				
+					meshes->AddNormal(Vec3(currentNormal[0], currentNormal[1], currentNormal[2]));
+				}
+
+				if (hasUV)
+				{
+					bool unmappedUV;
+					mesh->GetPolygonVertexUV(polygonIndex, verticeIndex, "", currentUV, unmappedUV);
+					meshes->AddUV(Vec2(currentUV[0], currentUV[1]));
+				}
+			}
+			++vertexCount;
+		}
+	}
 }
 
 void FBXHelper::ReadVertex(FbxMesh* mesh, int ctrlPointIndex, Vec3* vertex)

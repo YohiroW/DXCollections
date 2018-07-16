@@ -18,6 +18,8 @@
             _ptr_ = nullptr;     \
 		}
 
+#define TRIANGLE_VERTEX_COUNT   3
+
 typedef XMFLOAT4 Vec4;
 typedef XMFLOAT3 Vec3;
 typedef XMFLOAT2 Vec2;

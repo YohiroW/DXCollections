@@ -1,5 +1,6 @@
 #include "Meshes.h"
 #include "Globals.h"
+#include "FBXHelper.h"
 
 Meshes::Meshes()
 {
@@ -11,10 +12,14 @@ Meshes::~Meshes()
 
 bool Meshes::Initialize(ID3D11Device* device, const char * fbxPath)
 {
+	if (!FBXHelper::GetInstance()->LoadFBX(fbxPath, this))
+	{
+		return false;
+	}
 
+	GenerateBuffers(device);
 
-
-	return false;
+	return true;
 }
 
 void Meshes::GenerateBuffers(ID3D11Device* device)

@@ -14,11 +14,11 @@ public:
 	static FBXHelper* GetInstance();
 
 	bool Initialize();
+	bool LoadFBX(const char* fbxFileName, Meshes* meshes);
 
 protected:    
-	void LoadFBX(const char* fbxFileName, Meshes& meshes);
-	void ProcessNode(FbxNode* node);
-	void ProcessMesh(FbxMesh* mesh);
+	void ProcessNode(FbxNode* node, Meshes* meshes);
+	void ProcessMesh(FbxMesh* mesh, Meshes* meshes);
 
 	void ReadVertex(FbxMesh* mesh, int ctrlPointIndex, Vec3* vertex);
 	void ReadNormal(FbxMesh* mesh, int ctrlPointIndex, int vertexCounter, Vec3* normal);
