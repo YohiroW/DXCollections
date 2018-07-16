@@ -17,7 +17,7 @@ else()
 endif()
 
 # use unicode in projects		
-add_definitions(-DUNICODE -D_UNICODE)	
+add_definitions(-DUNICODE -D_UNICODE)
 
 set(thirdPartyPath "${CMAKE_SOURCE_DIR}/ThirdParty")
 
@@ -28,16 +28,18 @@ include_directories("$ENV{DXSDK_DIR}Include")
 
 # source files
 set(srcs Source/TestDemo.h
-         Source/main.cpp	 
+         Source/main.cpp 
 		 Common/Demo.h
          Common/Demo.cpp
          Common/FBXHelper.h
-         Common/FBXHelper.cpp		 
+         Common/FBXHelper.cpp
+         Common/Shader.h
+         Common/Shader.cpp		 
          Common/Application.h
 		 Common/Application.cpp
 		 Common/Globals.h
 		 Common/Meshes.h		 
-		 Common/Meshes.cpp		 
+		 Common/Meshes.cpp
 		 )	
 	 	 
 # add referenced library		 
