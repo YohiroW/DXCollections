@@ -33,6 +33,8 @@ bool FBXHelper::Initialize()
 	{
 		return false;
 	}
+	FbxIOSettings* ios = FbxIOSettings::Create(m_FbxMgr, IOSROOT);
+	m_FbxMgr->SetIOSettings(ios);
 
 	// Fbx scene 
 	m_SceneRoot = FbxScene::Create(m_FbxMgr, "");
@@ -41,37 +43,42 @@ bool FBXHelper::Initialize()
 		return false;
 	}
 
-	// Fbx importer
-	m_Importer = FbxImporter::Create(m_SceneRoot, "");
-	{
-		return false;
-	}
-	m_SceneRoot->Clear();
-
-	m_Importer->Import(m_SceneRoot);
-
-	m_Importer->Destroy();
-
 	return true;
 }
 
 bool FBXHelper::LoadFBX(const char * fbxFileName, Meshes* meshes)
 {
-	if (!m_Importer->Initialize(fbxFileName))
+	// Fbx importer
+	m_Importer = FbxImporter::Create(m_FbxMgr, "");
+	if (!m_Importer)
 	{
+		return false;
+	}
+	m_SceneRoot->Clear();
+
+	if (!m_Importer->Initialize(fbxFileName, -1, m_FbxMgr->GetIOSettings()))
+	{
+		std::string err = m_Importer->GetStatus().GetErrorString();
+		return false;
+	}
+
+	if (!m_Importer->Import(m_SceneRoot))
+	{
+		std::string err = m_Importer->GetStatus().GetErrorString();
 		return false;
 	}
 
 	ProcessNode(m_SceneRoot->GetRootNode(), meshes);
- 
+  
 	return true;
 }
 
 void FBXHelper::ProcessNode(FbxNode* node, Meshes* meshes)
 {
-	FbxNodeAttribute::EType type;
+	FbxMesh* mesh = node->GetMesh();
 
-	if(node->GetNodeAttribute())
+	FbxNodeAttribute* nodeAttribute = node->GetNodeAttribute();
+	if(nodeAttribute)
 	{
 		switch (node->GetNodeAttribute()->GetAttributeType())
 		{
