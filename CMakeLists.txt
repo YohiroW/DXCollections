@@ -28,6 +28,7 @@ include_directories("$ENV{DXSDK_DIR}Include")
 
 # source files
 set(srcs Source/TestDemo.h
+         Source/TestDemo.cpp
          Source/main.cpp 
 		 Common/Demo.h
          Common/Demo.cpp

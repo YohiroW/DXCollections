@@ -1,6 +1,7 @@
 #ifndef _TESTSAMPLE_H_
 #define _TESTSAMPLE_H_
 #include "Demo.h"
+#include "Meshes.h"
 
 class TestDemo : public Demo
 {
@@ -9,12 +10,16 @@ public:
 		:Demo(width, height, name)
 	{
 	}
-	~TestDemo() {}
+	~TestDemo();
 
-	virtual void OnInit() {}
-	virtual void OnUpdate() {}
-	virtual void OnRender() {}
-	virtual void OnDestroy() {}
+	virtual void OnInit() override;
+	virtual void OnUpdate() override;
+	virtual void OnRender() override;
+	virtual void OnDestroy() override;
+
+private:
+	Meshes * m_Model{ nullptr };
+
 };
 
 #endif
