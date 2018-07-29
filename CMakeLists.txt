@@ -35,7 +35,9 @@ set(srcs Source/TestDemo.h
          Common/FBXHelper.h
          Common/FBXHelper.cpp
          Common/Shader.h
-         Common/Shader.cpp		 
+         Common/Shader.cpp
+         Common/Sphere.h
+         Common/Sphere.cpp		 
          Common/Application.h
 		 Common/Application.cpp
 		 Common/Globals.h
