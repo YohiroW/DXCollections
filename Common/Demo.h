@@ -10,10 +10,11 @@ public:
 	virtual ~Demo();
 
 	// Interfaces
-	virtual void OnInit() = 0;
+	virtual void OnInit();
 	virtual void OnUpdate() = 0;
 	virtual void OnRender() = 0;
 	virtual void OnDestroy() = 0;
+	virtual void OnResize();
 
 	// Handle input
 	virtual void OnKeyDown(UINT8 /*key*/) {}
@@ -26,12 +27,24 @@ public:
 
 protected:
 	void SetCustomWindowText(LPCWSTR text);
+	void InitD3D11();
 
 	// Viewport dimensions.
 	UINT m_Width;
 	UINT m_Height;
 	float m_AspectRatio;
 
+	//
+	ID3D11Device* m_Device{ nullptr };
+	UINT      m_4xMsaaQuality;
+
+	ID3D11DeviceContext* m_Context{ nullptr };
+	IDXGISwapChain* m_SwapChain{ nullptr };
+	ID3D11Texture2D* m_DepthStencilBuffer{ nullptr };
+	ID3D11RenderTargetView* m_RenderTargetView{ nullptr };
+	ID3D11DepthStencilView* m_DepthStencilView{ nullptr };
+	D3D11_VIEWPORT m_ScreenViewport;
+	D3D_DRIVER_TYPE m_DriverType{ D3D_DRIVER_TYPE_HARDWARE };
 
 private:
 	std::wstring m_Title;
