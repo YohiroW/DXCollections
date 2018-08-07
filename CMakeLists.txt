@@ -1,9 +1,6 @@
 project( DXCollections )
 cmake_minimum_required( VERSION 2.8 )
 
-# Test branch
-
-
 include( CheckCXXCompilerFlag )
 check_cxx_compiler_flag( "-std=c++11"   COMPILER_SUPPORTS_CXX11 )
 check_cxx_compiler_flag( "-std=c++0x"   COMPILER_SUPPORTS_CXX0X )
@@ -23,9 +20,7 @@ endif()
 add_definitions(-DUNICODE -D_UNICODE)
 
 set(thirdPartyPath "${CMAKE_SOURCE_DIR}/ThirdParty")
-include_directories("common")
-include_directories("ThirdParty/fbxsdk/include")
-include_directories("$ENV{DXSDK_DIR}Include")
+
 # include directories
 include_directories("common")
 include_directories("ThirdParty/fbxsdk/include")
@@ -40,10 +35,6 @@ set(srcs Source/TestDemo.h
          Common/FBXHelper.h
          Common/FBXHelper.cpp
          Common/Shader.h
-		 Common/Shader.cpp
-         Common/Sphere.h
-         Common/Sphere.cpp		 
-         Common/Application.h
          Common/Shader.cpp
          Common/Sphere.h
          Common/Sphere.cpp		 
@@ -67,16 +58,9 @@ endif(CMAKE_SIZEOF_VOID_P)
 
 link_directories("$ENV{DXSDK_DIR}Lib/${platform}/")
 link_directories("${thirdPartyPath}/fbxsdk/lib/vs2015/${platform}/")
-if(CMAKE_SIZEOF_VOID_P)
-    set(platform x64)
-else(CMAKE_SIZEOF_VOID_P)
-    set(platform x86)
-endif(CMAKE_SIZEOF_VOID_P)	 
+
 add_executable(DXCollections "${srcs}")
 target_link_libraries(DXCollections "${libs}")
-# working directories
-set_target_properties(DXCollections PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Assets")
-set_target_properties(DXCollections PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
 # working directories
 set_target_properties(DXCollections PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Assets")
 set_target_properties(DXCollections PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
