@@ -1,6 +1,8 @@
 project( DXCollections )
 cmake_minimum_required( VERSION 2.8 )
 
+##### To test branch #####
+
 include( CheckCXXCompilerFlag )
 check_cxx_compiler_flag( "-std=c++11"   COMPILER_SUPPORTS_CXX11 )
 check_cxx_compiler_flag( "-std=c++0x"   COMPILER_SUPPORTS_CXX0X )
